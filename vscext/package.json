@@ -1,0 +1,97 @@
+{
+	"name": "skynet-debugger",
+	"displayName": "skynet debugger",
+	"description": "A debugger for skynet",
+	"version": "0.9.0",
+	"publisher": "colin",
+	"author": {
+		"name": "colin"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/colinsusie/skynetda"
+	},
+	"bugs": {
+		"url": "https://github.com/colinsusie/skynetda/issues"
+	},
+	"engines": {
+		"vscode": "^1.0.0"
+	},
+	"categories": [
+		"Debuggers"
+	],
+	"private": true,
+	"scripts": {
+	},
+	"main": "./extension.js",
+	"activationEvents": [
+		"onDebug"
+	],
+	"keywords": [
+		"debugger",
+		"lua",
+		"skynet"
+	],
+	"devDependencies": {
+		"@types/glob": "^7.1.1",
+		"@types/mocha": "^5.2.7",
+		"@types/node": "^12.11.7",
+		"@types/vscode": "^1.41.0",
+		"eslint": "^6.6.0",
+		"glob": "^7.1.5",
+		"mocha": "^6.2.2",
+		"typescript": "^3.6.4",
+		"vscode-test": "^1.2.2"
+	},
+	"contributes": {
+		"breakpoints": [
+			{
+				"language": "lua"
+			}
+		],
+		"debuggers": [
+			{
+				"type": "lua",
+				"label": "skynet debugger",
+				"languages": [
+					"lua"
+				],
+				"linux": {
+					"program": "./bin/linux/skynetda"
+				},
+				"osx": {
+					"program": "./bin/macosx/skynetda"
+				},
+				"initialConfigurations": [
+					{
+						"name": "skynet debugger",
+						"type": "lua",
+						"request": "launch",
+						"program": "${workspaceFolder}",
+						"config": "/examples/config_vsc"
+					}
+				],
+				"configurationAttributes": {
+					"launch": {
+						"required": [
+							"program"
+						],
+						"properties": {
+							"program": {
+								"type": "string",
+								"description": "set skynet directory",
+								"default": "${workspaceFolder}"
+							},
+							"config": {
+								"type": "string",
+								"description": "skynet config path",
+								"default": "${workspaceFolder}/examples/config_vsc"
+							}
+						}
+					}
+				}
+			}
+		]
+	}
+}
