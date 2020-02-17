@@ -1,2 +1,1 @@
-# skynetda
-debug adapter for skynet
+Debug adapter for skynet
