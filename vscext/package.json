@@ -16,7 +16,7 @@
 		"url": "https://github.com/colinsusie/skynetda/issues"
 	},
 	"engines": {
-		"vscode": "^1.0.0"
+		"vscode": "^1.41.0"
 	},
 	"categories": [
 		"Debuggers"
