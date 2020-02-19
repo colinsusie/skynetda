@@ -14,12 +14,14 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
-FILE *logger;
+FILE *logger = NULL;
 static bool init_debuglog() {
-    logger = fopen("debug.log", "w");
-    if (logger == NULL)
-        return false;
-    setbuf(logger, NULL);
+    if (!logger) {
+        logger = fopen("debug.log", "w");
+        if (logger == NULL)
+            return false;
+        setbuf(logger, NULL);
+    }
     return true;
 }
 
