@@ -93,12 +93,13 @@ static bool run_script(lua_State *L) {
     return true;
 }
 
-static void run_skynet(const char *path, const char *config, bool debug) {
+static void run_skynet(const char *path, const char *config, bool debug, const char *breakpoints) {
     if (debug)
         setenv("vscdbg_open", "on", 1);
     else
         setenv("vscdbg_open", "off", 1);
     setenv("vscdbg_workdir", path, 1);
+    setenv("vscdbg_bps", breakpoints, 1);
     chdir(path);
 
     debuglog("workdir: %s\n", path);
@@ -123,6 +124,7 @@ int main(int argc, char const *argv[]) {
     const char *dir = lua_tostring(L, -4);
     const char *config = lua_tostring(L, -3);
     bool debug = lua_toboolean(L, -2);
+    const char *breakpoints = lua_tostring(L, -1);
 
     int pid = fork();
     if (pid == -1) {
@@ -133,7 +135,7 @@ int main(int argc, char const *argv[]) {
             error_exit("wait: %s\n", strerror(errno));
         debuglog("child exit: %d\n", state);
     } else {
-        run_skynet(dir, config, debug);
+        run_skynet(dir, config, debug, breakpoints);
     }
 
     lua_close(L);
