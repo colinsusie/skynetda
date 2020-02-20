@@ -3,11 +3,10 @@
 	"displayName": "skynet debugger",
 	"description": "A Lua debugger for skynet",
 	"version": "0.9.0",
-	"publisher": "colin",
+	"publisher": "colinsusie",
 	"author": {
 		"name": "colin",
-		"url": "https://github.com/colinsusie",
-		"email": "124654806@qq.com"
+		"url": "https://github.com/colinsusie"
 	},
 	"license": "MIT",
 	"icon": "images/icon.png",
@@ -25,6 +24,9 @@
 		"Debuggers"
 	],
 	"private": true,
+	"extensionKind": [
+		"workspace"
+	],
 	"scripts": {
 	},
 	"main": "./extension.js",
@@ -89,7 +91,7 @@
 							"config": {
 								"type": "string",
 								"description": "skynet config path",
-								"default": "${workspaceFolder}/examples/config_vsc"
+								"default": "./examples/config_vsc"
 							}
 						}
 					}

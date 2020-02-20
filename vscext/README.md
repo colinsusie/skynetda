@@ -6,7 +6,7 @@ Skynet Lua Debug Adapter
 
 ## Features
 
-这是用于调试[skynet](https://github.com/colinsusie/skynet)程序的Lua Debug Adatper，它提供如下特性：
+这是一个VSCode的调试器扩展，用于调试基于skynet框架的Lua程序，它提供如下特性：
 
 - 将skynet.error输出到`DEBUG CONSOLE`面板，点击每行日志的右边可以跳转到日志输出的代码。
 - 设置断点，除了普通断点，还支持以下几种断点：
