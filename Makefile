@@ -15,9 +15,9 @@ IPATH= -I3rd/lua/src
 LPATH= -L3rd/lua/src
 
 ifeq ($(PLAT), macosx)
-MYFLAGS := -std=gnu99 -g -Wall $(IPATH) 
+MYFLAGS := -std=gnu99 -O2 -Wall $(IPATH) 
 else
-MYFLAGS := -std=gnu99 -g -Wall -Wl,-E $(IPATH) 
+MYFLAGS := -std=gnu99 -O2 -Wall -Wl,-E $(IPATH) 
 endif
 
 LIBS= -ldl -lm -llua $(LPATH)
