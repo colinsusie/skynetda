@@ -1,13 +1,16 @@
 {
 	"name": "skynet-debugger",
 	"displayName": "skynet debugger",
-	"description": "A debugger for skynet",
+	"description": "A Lua debugger for skynet",
 	"version": "0.9.0",
 	"publisher": "colin",
 	"author": {
-		"name": "colin"
+		"name": "colin",
+		"url": "https://github.com/colinsusie",
+		"email": "124654806@qq.com"
 	},
 	"license": "MIT",
+	"icon": "images/icon.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/colinsusie/skynetda"
