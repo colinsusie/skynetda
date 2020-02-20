@@ -72,7 +72,7 @@
 						"type": "lua",
 						"request": "launch",
 						"program": "${workspaceFolder}",
-						"config": "/examples/config_vsc"
+						"config": "./examples/config_vsc"
 					}
 				],
 				"configurationAttributes": {
