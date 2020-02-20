@@ -15,12 +15,28 @@
 #include "lauxlib.h"
 
 FILE *logger = NULL;
+
+static void error_exit(const char* format, ...) {
+    va_list ap;
+    va_start(ap, format);
+    vfprintf(logger, format, ap);
+    va_end(ap);
+    fflush(stdout);
+    exit(1);
+}
+
 static bool init_debuglog() {
     if (!logger) {
         logger = fopen("debug.log", "w");
         if (logger == NULL)
             return false;
         setbuf(logger, NULL);
+
+        // stderr -> logger
+        int fd = fileno(logger);
+        if (dup2(fd, STDERR_FILENO) == -1) {
+            error_exit("dup2: %s", strerror(errno));
+        }
     }
     return true;
 }
@@ -30,15 +46,6 @@ static void debuglog(const char* format, ...) {
     va_start(ap, format);
     vfprintf(logger, format, ap);
     va_end(ap);
-}
-
-static void error_exit(const char* format, ...) {
-    va_list ap;
-    va_start(ap, format);
-    vfprintf(logger, format, ap);
-    va_end(ap);
-    fflush(stdout);
-    exit(1);
 }
 
 static int sigign() {
