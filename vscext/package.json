@@ -1,6 +1,6 @@
 {
 	"name": "skynet-debugger",
-	"displayName": "skynet debugger",
+	"displayName": "Skynet Debugger",
 	"description": "A Lua debugger for skynet",
 	"version": "0.9.0",
 	"publisher": "colinsusie",

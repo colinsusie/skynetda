@@ -1,28 +1,35 @@
-这是一个VSCode的调试器扩展，用于调试基于`skynet`框架的Lua程序，下面是详细的使用指南。
+这是一个VSCode的调试插件，用于调试基于`skynet`框架的Lua程序，下面是详细的使用指南。
 
 ## 构建skynet
 
-首先你要使用支持调试器扩展的skynet版本，地址在：
+请使用支持调试插件的skynet：
 
 [https://github.com/colinsusie/skynet](https://github.com/colinsusie/skynet)
 
-这个版本和[官方的版本](https://github.com/cloudwu/skynet)完全一致，并且会一直合并最新的修改；由于skynet极其精简的内核，实现这个调试器并不用修改框架的代码，只是增加了下面几个模块：
+这个版本和[官方的版本](https://github.com/cloudwu/skynet)完全一致，并且会一直合并最新的修改；由于skynet极其精简的内核，所以实现这个调试器并没有修改框架的代码，只是增加了几个额外的模块：
 
-- vscdebuglog.lua 用于代替skynet默认的logger服务，将日志输出到VSCode的控制台。
+- cjson 用于和VSCode进行json格式的数据交换。
+- vscdebuglog.lua 用于替代skynet默认的logger服务，使日志能输出到VSCode的控制台。
 - vscdebugd.lua 一个专门和VSCode交互的lua服务。
-- vscdebug.lua 注入到skynet.lua，为Lua服务提供调试支持。
+- vscdebug.lua 注入到skynet.lua的调试模块。
 
-所以完全可以放心使用，构建方法请看[skynet的WIKI](https://github.com/cloudwu/skynet/wiki/Build)
+skynet构建方法请看[WIKI](https://github.com/cloudwu/skynet/wiki/Build)
 
 ## 安装扩展
 
-在VSCode的`Extensions`面板中搜索`skynetda`，安装这个扩展，该扩展只支持`Linux/MacOSX/FreeBSD`，这和skynet支持的系统一样。
+在VSCode的`Extensions`面板中搜索`Skynet Debugger`，安装这个插件，该插件不支持Windows，如果你在Windows下工作，那么可以通过VSCode的[Remote SSH](https://code.visualstudio.com/docs/remote/ssh)打开远程服务器上的skynet工程，然后再安装`Skynet Debugger`，此时该插件会安装在服务器上，这样就可以在Windows下编辑和调试服务器上的skynet工程。
 
-如果你在Windows下工作，那么可以通过VSCode的`Remote SSH`扩展打开Linux服务器上的skynet工程，然后再安装skynetda，这样就可以在Windows下编辑和调试服务器上的skynet工程了。
+插件的发布版只包含了在`Debian GNU/Linux 8.8 (jessie)-64bit`和`macOS Catalina`下编译的可执行程序，在这两个系统中应该是可以运行起来的。其他平台则需要自己重新构建程序：
+
+- 克隆代码：`git clone https://github.com/colinsusie/skynetda.git`
+- 构建：`cd skynetda; make linux`
+- 完成之后在`vscext/bin/linux`中有`skynetda`和`cjson.so`两个文件,需要将这两个文件拷贝到插件的安装目录中：
+    - 如果连接SSH远程服务器，插件目录应该在：`~/.vscode-server/extensions/colinsusie.skynet-debugger-0.9.0/bin/linux/`
+    - 如果是Linux系统的本地插件，则应该在：`~/.vscode/extensions/colinsusie.skynet-debugger-0.9.0/bin/linux/`
 
 ## 配置launch.json
 
-运行VSCode，打开skynet工程，在`Run and Debug`面板中创建一个`launch.json`文件，内容如下：
+插件安装完毕之后，打开skynet工程，在`Run and Debug`面板中创建一个`launch.json`文件，内容如下：
 
 ```json
 {
@@ -30,18 +37,18 @@
 	"type": "lua",
 	"request": "launch",
 	"program": "${workspaceFolder}",
-	"config": "examples/config_vsc"
+	"config": "./examples/config_vsc"
 },
 ```
 
-其中`program`是skynet执行程序所在的目录，`config`是skynet运行所需的配置文件。
+其中`program`是skynet执行程序所在的**目录**，`config`是skynet运行所需的配置文件,这两个根据自己的情况设置。
 
-## 配置config
+## 配置skynet的config文件
 
-skynet的config文件如下：
+要使skynet运行之后可以被调试，还需要修改一下config文件：
 
 ```lua
-root = "/home/colin/skynet/"
+root = "$vscdbg_workdir/"
 thread = 4
 logger = "vscdebuglog"
 logservice = "snlua"
@@ -59,19 +66,19 @@ snax = root.."examples/?.lua;"..root.."test/?.lua"
 cpath = root.."cservice/?.so"
 
 vscdbg_open = "$vscdbg_open"
+vscdbg_bps = [=[$vscdbg_bps]=]
 ```
 
-有3个地方要修改：
-
-- Lua的搜索路径必须为全路径，因此`root`要写成绝对路径，然后lua_path, lua_cpath等等这些都必须加上root前缀，这样才能正确断点。
-- 加上`vscdbg_open = "$vscdbg_open"`这一句，调试器扩展会设置`$vscdbg_open`环境变量。
+- root设置为`$vscdbg_workdir/`，调试器会设置环境变量，skynet会用环境变量替换这个宏；当然你也可以直接设置成绝对路径。
+- 所有涉及到路径的字段，都必须加上root前缀，比如`luaservice, lualoader, lua_path...`等等这些；这是因为调试器必须用绝对路径，否则路径判断会不对。
 - 修改`logger`和`logservice`，将默认logger指定为`vscdebuglog`
+- 加上`vscdbg_open = "$vscdbg_open"`和`vscdbg_bps = [=[$vscdbg_bps]=]`，调试器通过`$vscdbg_open`告诉skynet是否要开启调试，另外`$vscdbg_bps`是初始的断点信息，最好如示例那样用`[=[...]=]`语法来包含
 
-建议准备两份config文件，一份如上所示用于开发期调试用；另一份则为正式配置。
+这一份config一般就用于开发期调试用，发布的版本再用正式的config。
 
 ## 开始调试
 
-vscdebug只能调试你指定的Lua服务，所以要在调试的服务脚本开头加一句Lua代码，比如testvscdebug.lua这个服务：
+调试框架只能调试指定的Lua服务，所以如果你想调试某个Lua服务，则要在那个服务加一句Lua代码，比如testvscdebug.lua这个服务：
 
 ```lua
 require("skynet.vscdebug").start()  -- 加上这一句
@@ -82,36 +89,39 @@ skynet.start(function()
 end)
 ```
 
-加好之后，就可以在代码中下断点，然后按`F5`开始调试，调试的效果如下图所示：
+加好之后，就可以在代码中设置断点，然后按`F5`开始调试，调试的效果如下图所示：
 
 ![sn1.png](vscext/images/sn1.png)
 
-这句代码加在`skynet.start`所在的文件加就可以了，之后整个Lua服务都可以调试；发布版本这行代码也不用删除，因为没有VSCode环境，vscdebug.lua什么事也不做。
+`require("skynet.vscdebug").start()`这句代码加在`skynet.start`所在的文件就可以了，之后这个服务运行到的代码都可以被调试。
+
+如果skynet不是由调试器插件执行起来的，那么vscdebug.lua什么事也没做，所以这句代码其实可以不用删除，不会有任何效率上的损失。
 
 ## vscdebug的功能
 
-- 将skynet.error输出到`DEBUG CONSOLE`面板，点击每行日志的右边可以跳转到输出日志的代码。
-- 设置断点，除了普通断点，还支持以下几种断点：
+vscdebug实现了大多数常用的调试功能：
+
+- 它可以将skynet.error输出到`DEBUG CONSOLE`面板，点击日志还可跳转到相应的代码行；但是`print, io.stdout`就不行，调用这两个函数什么也不会输出。
+- 除了可以设置普通断点外，还支持以下几种断点：
     - 条件断点：当表达式为true时停下来。
     - Hit Count断点：命中一定次数后停下来。
-    - 日志断点：命中时输出日志，日志中可以包含表达式。
-- 当断点停下来时，可以：
+    - 日志断点：命中时输出日志。
+- 当程序命中断点后停了下来，你就可以：
     - 查看调用堆栈。
     - 查看每一层栈帧的局部变量，自由变量。
     - 通过`WATCH`面板增加监控的表达式。
-    - 可在`DEBUG CONSOLE`底部输入表达式求值，甚至可以修改局部变量。
-    - 鼠标悬停在变量上查看变量的值。
+    - 可在`DEBUG CONSOLE`底部输入表达式，该表达式会在当前栈帧环境中执行，并得到结果输出。
 - 支持`Step into`, `Step over`, `Step out`, `Continue`等调试命令。
 
 ## vscdebug怎么工作
 
-vscdebug并不是像原生调试器那样把整个程序冻住，它在某一时刻只能调试一个Lua服务的一个协程，在调试过程中，其他协程将照常执行，即使是被调试服务的其他协程也是如此。
+编写skynet调试器的难点在于：skynet里面有很多个Lua虚拟机，并且这些虚拟机是在多个线程中运行的。要像原生调试器那样把整个程序冻住似乎很有难度，我最后决定像skynet的`DebugConsole`那样，让它在同一时刻只能调试Lua服务的一个协程，除了这个被调试的协程会停住，其他协程还是照常执行。所以断点命中后，看起来像是停下来了，其实它还在快速的处理消息。
 
-它是这样处理的：当一个协程的Hook触发时，如果命中断点，那么Hook函数会调用lua_yield停掉这个协程；接下来就可以对这个协程进行各种”观察”，比如查看调用堆栈，查看某个栈层级的局部变量，自由变量等等。此后执行`单步调试`，会使该协程执行一行后又被yield起，如此重复，直到执行`继续`命令。
+它的实现是这样的：当一个协程的Hook触发时，如果命中断点，那么Hook函数会调用lua_yield停掉这个协程；接下来就可以对这个协程进行各种”观察”。此后执行`单步调试`，会使该协程执行一行后又被yield，如此重复，直到执行`继续`命令。
 
-Lua服务的主协程不能yield，所以主协程不可以调试。但这个限制也没什么大问题，因为skynet的主协程主要用于派发消息，具体的消息处理都在其他协程完成。
+由于Lua服务的主协程不能yield，所以主协程不可以调试。但这个限制没什么大问题，因为skynet的主协程主要用于派发消息，具体的消息处理都在其他协程完成。
 
-在开发过程中，我发现了Lua的一个BUG，就是被Hook函数调用lua_yield的协程，它的savedpc会往前退一条指令，这就导致有些局部变量显示不出来，修正方法是在`ldebug.c`：
+在开发过程中，我发现了Lua的一个BUG，就是被Hook函数调用lua_yield的协程，它的savedpc会往前退一条指令，这就导致那一层有些局部变量显示不出来，修正方法是在`ldebug.c`：
 
 ```c
 static int currentpc (CallInfo *ci) {
