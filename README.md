@@ -49,7 +49,7 @@ skynet构建方法请看[WIKI](https://github.com/cloudwu/skynet/wiki/Build)
 要使skynet运行之后可以被调试，还需要修改一下config文件：
 
 ```lua
-root = "$vscdbg_workdir/"
+root = "/home/colin/skynet/"
 thread = 4
 logger = "vscdebuglog"
 logservice = "snlua"
@@ -70,8 +70,8 @@ vscdbg_open = "$vscdbg_open"
 vscdbg_bps = [=[$vscdbg_bps]=]
 ```
 
-- root设置为`$vscdbg_workdir/`，调试器会设置环境变量，skynet会用环境变量替换这个宏；当然你也可以直接设置成绝对路径。
-- 所有涉及到路径的字段，都必须加上root前缀，比如`luaservice, lualoader, lua_path...`等等这些；这是因为调试器必须用绝对路径，否则路径判断会不对。
+- root设置成绝对路径。
+- 所有涉及到路径的字段，都必须加上root前缀，比如`luaservice, lualoader, lua_path...`等等这些；这是因为调试器必须用绝对路径，否则路径判断不对。
 - 修改`logger`和`logservice`，将默认logger指定为`vscdebuglog`
 - 加上`vscdbg_open = "$vscdbg_open"`和`vscdbg_bps = [=[$vscdbg_bps]=]`，调试器通过`$vscdbg_open`告诉skynet是否要开启调试，另外`$vscdbg_bps`是初始的断点信息，最好如示例那样用`[=[...]=]`来包含。
 
