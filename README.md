@@ -24,8 +24,9 @@ skynet构建方法请看[WIKI](https://github.com/cloudwu/skynet/wiki/Build)
 - 克隆代码：`git clone https://github.com/colinsusie/skynetda.git`
 - 构建：`cd skynetda; make linux`
 - 完成之后在`vscext/bin/linux`中有`skynetda`和`cjson.so`两个文件,需要将这两个文件拷贝到插件的安装目录中：
-    - 如果是SSH远程服务器，插件目录应该在：`~/.vscode-server/extensions/colinsusie.skynet-debugger-0.9.0/bin/linux/`
-    - 如果是Linux系统的本地插件，则应该在：`~/.vscode/extensions/colinsusie.skynet-debugger-0.9.0/bin/linux/`
+    - 如果是SSH远程服务器，插件目录应该在：`~/.vscode-server/extensions/colinsusie.skynet-debugger-x.x.x/bin/linux/`
+    - 如果是Linux系统的本地插件，则应该在：`~/.vscode/extensions/colinsusie.skynet-debugger-x.x.x/bin/linux/`
+    - 上面的x.x.x替换为具体的版本号
 
 ## 配置launch.json
 

@@ -2,7 +2,7 @@
 	"name": "skynet-debugger",
 	"displayName": "Skynet Debugger",
 	"description": "A Lua debugger for skynet",
-	"version": "0.9.0",
+	"version": "0.9.1",
 	"publisher": "colinsusie",
 	"author": {
 		"name": "colin",
@@ -27,8 +27,7 @@
 	"extensionKind": [
 		"workspace"
 	],
-	"scripts": {
-	},
+	"scripts": {},
 	"main": "./extension.js",
 	"activationEvents": [
 		"onDebug"

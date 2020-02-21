@@ -36,15 +36,19 @@ local function calc_hitcount(hitexpr)
 end
 
 function reqfuncs.setBreakpoints(req)
-    args = req.arguments
+    local args = req.arguments
     local src = args.source.path
     local bpinfos = {}
     local bps = {}
     for _, bp in ipairs(args.breakpoints) do
+        local logmsg
+        if bp.logMessage and bp.logMessage ~= "" then
+            logmsg = bp.logMessage .. '\n'
+        end
         bpinfos[#bpinfos+1] = {
             source = {path = src},
             line = bp.line,
-            logMessage = bp.logMessage,
+            logMessage = logmsg,
             condition = bp.condition,
             hitCount = calc_hitcount(bp.hitCondition),
             currHitCount = 0,
