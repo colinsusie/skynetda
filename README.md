@@ -1,8 +1,8 @@
-这是一个VSCode的调试插件，用于调试基于`skynet`框架的Lua程序，下面是详细的使用指南。
+这是一个VSCode的调试插件，用于调试`skynet`中的Lua程序，下面是详细的使用指南。
 
 ## 构建skynet
 
-请使用支持调试插件的skynet：
+要想支持调试功能，你得使用这个skynet版本：
 
 [https://github.com/colinsusie/skynet](https://github.com/colinsusie/skynet)
 
@@ -13,17 +13,17 @@
 - vscdebugd.lua 一个专门和VSCode交互的lua服务。
 - vscdebug.lua 注入到skynet.lua的调试模块。
 
-skynet构建方法请看[WIKI](https://github.com/cloudwu/skynet/wiki/Build)
+skynet的构建方法请看[WIKI](https://github.com/cloudwu/skynet/wiki/Build)
 
 ## 安装扩展
 
-在VSCode的`Extensions`面板中搜索`Skynet Debugger`，安装这个插件，该插件不支持Windows，如果你在Windows下工作，那么可以通过VSCode的[Remote SSH](https://code.visualstudio.com/docs/remote/ssh)打开远程服务器上的skynet工程，然后再安装`Skynet Debugger`，此时该插件会安装在服务器上，这样就可以在Windows下编辑和调试服务器上的skynet工程。
+在VSCode的`Extensions`面板中搜索`Skynet Debugger`，安装这个插件，该插件不支持Windows，如果你在Windows下工作，那么可以通过VSCode的[Remote SSH](https://code.visualstudio.com/docs/remote/ssh)打开远程服务器上的skynet工程，然后再安装`Skynet Debugger`，此时插件会安装在服务器上，这样就可以在Windows下编辑和调试服务器上的skynet工程。
 
 插件的发布版只包含了在`Debian GNU/Linux 8.8(jessie)-64bit`和`macOS 10.15.2(Catalina)`下编译的可执行程序，在这两个系统中应该是可以运行起来的。其他平台则需要自己重新构建：
 
 - 克隆代码：`git clone https://github.com/colinsusie/skynetda.git`
 - 构建：`cd skynetda; make linux`
-- 完成之后在`vscext/bin/linux`中有`skynetda`和`cjson.so`两个文件,需要将这两个文件拷贝到插件的安装目录中：
+- 完成之后在`vscext/bin/linux`中有`skynetda`和`cjson.so`两个文件,需要将这两个文件拷贝到插件的安装目录去：
     - 如果是SSH远程服务器，插件目录应该在：`~/.vscode-server/extensions/colinsusie.skynet-debugger-x.x.x/bin/linux/`
     - 如果是Linux系统的本地插件，则应该在：`~/.vscode/extensions/colinsusie.skynet-debugger-x.x.x/bin/linux/`
     - 上面的x.x.x替换为具体的版本号
@@ -42,14 +42,16 @@ skynet构建方法请看[WIKI](https://github.com/cloudwu/skynet/wiki/Build)
 },
 ```
 
-其中`program`是skynet执行程序所在的**目录**，`config`是skynet运行所需的配置文件,这两个根据自己的情况设置。
+`program`是skynet执行程序所在的**目录**
+
+`config`是skynet所需的配置文件，这个路径是相对于skynet目录的，当然你也可以用绝对路径，比如：`${workspaceFolder}/examples/config_vsc`
 
 ## 配置skynet的config文件
 
 要使skynet运行之后可以被调试，还需要修改一下config文件：
 
 ```lua
-root = "/home/colin/skynet/"
+root = "./"
 thread = 4
 logger = "vscdebuglog"
 logservice = "snlua"
@@ -70,8 +72,6 @@ vscdbg_open = "$vscdbg_open"
 vscdbg_bps = [=[$vscdbg_bps]=]
 ```
 
-- root设置成绝对路径。
-- 所有涉及到路径的字段，都必须加上root前缀，比如`luaservice, lualoader, lua_path...`等等这些；这是因为调试器必须用绝对路径，否则路径判断不对。
 - 修改`logger`和`logservice`，将默认logger指定为`vscdebuglog`
 - 加上`vscdbg_open = "$vscdbg_open"`和`vscdbg_bps = [=[$vscdbg_bps]=]`，调试器通过`$vscdbg_open`告诉skynet是否要开启调试，另外`$vscdbg_bps`是初始的断点信息，最好如示例那样用`[=[...]=]`来包含。
 
@@ -79,24 +79,11 @@ vscdbg_bps = [=[$vscdbg_bps]=]
 
 ## 开始调试
 
-该插件只能调试指定的Lua服务，所以如果你想调试某个Lua服务，则要在那个服务加一句Lua代码，比如testvscdebug.lua这个服务：
-
-```lua
-require("skynet.vscdebug").start()  -- 加上这一句
-
-local skynet = require "skynet"
-skynet.start(function()
-    -- 你的代码
-end)
-```
-
-加好之后，就可以在代码中设置断点，然后按`F5`开始调试，效果如下图所示：
+到这里准备工作已经完毕，你可以在代码中设置断点，然后按`F5`开始调试，效果如下图所示：
 
 ![sn1.png](vscext/images/sn1.png)
 
-`require("skynet.vscdebug").start()`这句代码加在`skynet.start`所在的文件就可以了，之后这个服务运行到的代码都可以被调试。
-
-如果skynet不是由调试器插件执行起来的，那么vscdebug.lua什么事也没做，所以这句代码其实可以不用删除，不会有任何效率上的损失。
+该插件只能调试外部写的服务，`skynet/sevice`目录中的服务不可调试。
 
 ## vscdebug的功能
 
