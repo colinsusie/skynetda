@@ -1,3 +1,4 @@
+package.cpath = "./?.so;" .. package.cpath
 local cjson = require "cjson"
 cjson.encode_empty_table_as_array(true)
 local vscaux = require "vscaux"
