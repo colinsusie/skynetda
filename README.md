@@ -6,20 +6,23 @@
 
 [https://github.com/colinsusie/skynet](https://github.com/colinsusie/skynet)
 
-这个版本和[官方的版本](https://github.com/cloudwu/skynet)完全一致，并且会一直合并最新的修改；由于skynet极其精简的内核，所以实现这个调试器并没有修改框架的代码，只是增加了几个额外的模块：
+这个版本和[官方的版本](https://github.com/cloudwu/skynet)完全一致，并且会一直合并最新的修改；由于skynet极其精简的内核，所以实现这个调试器并没有修改框架的代码，只是增加了几个额外的模块。skynet的构建方法请看[WIKI](https://github.com/cloudwu/skynet/wiki/Build)，下面是一个简单的构建例子(ubuntu/debian)：
 
-- cjson 用于和VSCode进行json格式的数据交换。
-- vscdebuglog.lua 用于替代skynet默认的logger服务，使日志能输出到VSCode的控制台。
-- vscdebugd.lua 一个专门和VSCode交互的lua服务。
-- vscdebug.lua 注入到skynet.lua的调试模块。
-
-skynet的构建方法请看[WIKI](https://github.com/cloudwu/skynet/wiki/Build)
+```sh
+sudo apt-get install readline-dev autoconf
+# 上面不行就运行：sudo apt-get install libreadline-dev autoconf
+git clone https://github.com/colinsusie/skynet.git
+cd skynet
+make linux
+```
 
 ## 安装扩展
 
-在VSCode的`Extensions`面板中搜索`Skynet Debugger`，安装这个插件，该插件不支持Windows，如果你在Windows下工作，那么可以通过VSCode的[Remote SSH](https://code.visualstudio.com/docs/remote/ssh)打开远程服务器上的skynet工程，然后再安装`Skynet Debugger`，此时插件会安装在服务器上，这样就可以在Windows下编辑和调试服务器上的skynet工程。
+接下来在VSCode的`Extensions`面板中搜索`Skynet Debugger`安装这个插件，**该插件不支持Windows，如果你在Windows下工作，那么可以通过VSCode的[Remote SSH](https://code.visualstudio.com/docs/remote/ssh)打开远程服务器上的skynet工程，然后再安装`Skynet Debugger`，此时插件会安装在服务器上，这样就可以在Windows下编辑和调试服务器上的skynet工程。**
 
-插件的发布版只包含了在`Debian GNU/Linux 8.8(jessie)-64bit`和`macOS 10.15.2(Catalina)`下编译的可执行程序，在这两个系统中应该是可以运行起来的。其他平台则需要自己重新构建：
+插件的发布版只包含了在`Debian GNU/Linux 8.8(jessie)-64bit`和`macOS 10.15.2(Catalina)`下编译的可执行程序，在这两个系统中应该是可以运行起来的。
+
+其他平台先试试是否可以调试，如果不能则需要自己重新构建插件的执行程序：
 
 - 克隆代码：`git clone https://github.com/colinsusie/skynetda.git`
 - 构建：`cd skynetda; make linux`
@@ -30,30 +33,28 @@ skynet的构建方法请看[WIKI](https://github.com/cloudwu/skynet/wiki/Build)
 
 ## 配置launch.json
 
-插件安装完毕之后，打开skynet工程，在`Run and Debug`面板中创建一个`launch.json`文件，内容如下：
+插件安装完毕之后，用VSCode打开skynet工程，在`Run and Debug`面板中创建一个`launch.json`文件，内容如下：
 
 ```json
 {
 	"name": "skynet debugger",
 	"type": "lua",
 	"request": "launch",
-	"program": "${workspaceFolder}",
+	"program": "/home/colin/skynet",
 	"config": "./examples/config_vsc"
 },
 ```
 
-`program`是skynet执行程序所在的**目录**
+`program`是skynet编译后可执行程序所在的**目录**。
 
-`config`是skynet所需的配置文件，这个路径是相对于skynet目录的，当然你也可以用绝对路径，比如：`${workspaceFolder}/examples/config_vsc`
+`config`是skynet所需的配置文件，**注意这个路径是相对于skynet目录的**，当然你也可以用绝对路径，比如：`/home/colin/skynet/examples/config_vsc`
 
-## 配置skynet的config文件
-
-要使skynet运行之后可以被调试，还需要修改一下config文件：
+config_vsc文件的内容如下：
 
 ```lua
 root = "./"
 thread = 4
-logger = "vscdebuglog"
+logger = "vscdebuglog" -- 将默认logger指定为`vscdebuglog`
 logservice = "snlua"
 
 logpath = "."
@@ -68,22 +69,28 @@ lua_cpath = root .. "luaclib/?.so"
 snax = root.."examples/?.lua;"..root.."test/?.lua"
 cpath = root.."cservice/?.so"
 
-vscdbg_open = "$vscdbg_open"
+-- 下面两个固定这样即可
+vscdbg_open = "$vscdbg_open"     
 vscdbg_bps = [=[$vscdbg_bps]=]
 ```
 
-- 修改`logger`和`logservice`，将默认logger指定为`vscdebuglog`
-- 加上`vscdbg_open = "$vscdbg_open"`和`vscdbg_bps = [=[$vscdbg_bps]=]`，调试器通过`$vscdbg_open`告诉skynet是否要开启调试，另外`$vscdbg_bps`是初始的断点信息，最好如示例那样用`[=[...]=]`来包含。
-
-这一份config一般用于开发期的调试用，发布的版本再用正式的config。
+这一份配置一般用于开发期的调试使用，发布的版本要用正式的config。
 
 ## 开始调试
 
-到这里准备工作已经完毕，你可以在代码中设置断点，然后按`F5`开始调试，效果如下图所示：
+到这里准备工作已经完毕，你可以在代码(比如：testvscdebug)中设置断点，然后按`F5`开始调试，效果如下图所示：
 
 ![sn1.png](vscext/images/sn1.png)
 
 该插件只能调试外部写的服务，`skynet/sevice`目录中的服务不可调试。
+
+如果F5之后没有成功调试，你可以CD到插件目录，比如：
+
+- `~/.vscode-server/extensions/colinsusie.skynet-debugger-x.x.x/bin/linux/` 或
+- `~/.vscode/extensions/colinsusie.skynet-debugger-x.x.x/bin/linux/`或
+- `~/.vscode/extensions/colinsusie.skynet-debugger-x.x.x/bin/macosx/`
+
+里面有一个debug.log文件，查看里面的文件，查找错误原因。
 
 ## vscdebug的功能
 
