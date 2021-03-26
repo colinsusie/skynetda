@@ -45,7 +45,7 @@ make linux
 },
 ```
 
-`program`是skynet编译后可执行程序所在的**目录**。
+`program`是skynet编译后可执行程序所在的**目录**。注意是目录不是可执行文件，很多跑起来后无响应，都是因为这个目录指向不对。建议使用绝对路径指向skynet的目录。
 
 `config`是skynet所需的配置文件，**注意这个路径是相对于skynet目录的**，当然你也可以用绝对路径，比如：`/home/colin/skynet/examples/config_vsc`
 
