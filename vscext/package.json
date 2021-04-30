@@ -2,7 +2,7 @@
 	"name": "skynet-debugger",
 	"displayName": "Skynet Debugger",
 	"description": "A Lua debugger for skynet",
-	"version": "0.9.1",
+	"version": "1.0.1",
 	"publisher": "colinsusie",
 	"author": {
 		"name": "colin",
@@ -72,8 +72,10 @@
 						"name": "skynet debugger",
 						"type": "lua",
 						"request": "launch",
-						"program": "${workspaceFolder}",
-						"config": "./examples/config_vsc"
+						"workdir": "${workspaceFolder}",
+						"program": "./skynet",
+						"config": "./examples/config_vsc",
+						"service":  "./service"
 					}
 				],
 				"configurationAttributes": {
@@ -82,15 +84,25 @@
 							"program"
 						],
 						"properties": {
+							"workdir": {
+								"type": "string",
+								"description": "Set the work directory",
+								"default": "${workspaceFolder}"
+							},
 							"program": {
 								"type": "string",
-								"description": "set skynet directory",
-								"default": "${workspaceFolder}"
+								"description": "Set the path of skynet program, the path is relative to workdir",
+								"default": "./skynet"
 							},
 							"config": {
 								"type": "string",
 								"description": "skynet config path",
 								"default": "./examples/config_vsc"
+							},
+							"service": {
+								"type": "string",
+								"description": "Set the path of skynet service, the path is relative to workdir",
+								"default": "./service"
 							}
 						}
 					}

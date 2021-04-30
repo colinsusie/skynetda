@@ -1,10 +1,11 @@
-package.cpath = "./?.so;" .. package.cpath
 local cjson = require "cjson"
 cjson.encode_empty_table_as_array(true)
 local vscaux = require "vscaux"
 
-local skynet_dir = ""
-local config_path = ""
+local workdir = ""
+local skynet = ""
+local config = ""
+local service = ""
 local open_debug = true
 
 local reqfuncs = {}
@@ -75,11 +76,13 @@ function reqfuncs.configurationDone(req)
 end
 
 function reqfuncs.launch(req)
-    skynet_dir = req.arguments.program
-    if skynet_dir:sub(-1) == "/" then
-        skynet_dir = skynet_dir:sub(1, -2)
-    end
-    config_path = req.arguments.config
+	workdir = req.arguments.workdir or "."
+	if workdir:sub(-1) == "/" then
+		workdir = workdir:sub(1, -2)
+	end
+    skynet = req.arguments.program
+    config = req.arguments.config
+	service = req.arguments.service
     open_debug = not req.arguments.noDebug
     return true
 end
@@ -101,7 +104,7 @@ function handle_request()
 end
 
 if handle_request() then
-    return skynet_dir, config_path, open_debug, cjson.encode(breakpoints)
+    return workdir, skynet, config, service, open_debug, cjson.encode(breakpoints)
 else
     error("launch error")
 end
