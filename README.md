@@ -4,6 +4,11 @@
 
 最新版的插件增加了工作目录(workdir)的设置，需要配合最新的skynet版本，请看下面的详细说明。
 
+如果有用 skynet debugger 1.0.0 版的，升级到 skynet debugger 1.0.1 之后可能无法调试，需作如下处理：
+
+- 升级到最新的[skynet](https://github.com/colinsusie/skynet)
+- 把原工程的 launch.json 删除掉，重新在 VSCode 下创建launch.json，并设置相关的路径。
+
 ## 构建skynet
 
 要想支持调试功能，你必须使用这个skynet版本：
